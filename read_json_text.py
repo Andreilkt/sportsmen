@@ -82,7 +82,7 @@ def process_json(input_file, output_dir, key_to_match, categories_to_process, ke
             print(f"Ошибка при записи в файл '{output_file}': {e}")
 
 
-def combine_data(output_dir, prize_files, categories_to_process):
+def combine_data(output_dir, prize_files, categories_to_process, place=None):
     """
     Читает текстовые файлы и объединяет с JSON, созданным process_json.
 
@@ -123,7 +123,8 @@ def combine_data(output_dir, prize_files, categories_to_process):
         combined_data = {
             "Категория": category,
             "results": json_data,
-            "prizes": prizes
+            "prizes": prizes,
+            "место" : place,
         }
 
         combined_output_file = output_dir + "/" + f"{category}_combined.json"  # формируем путь строкой

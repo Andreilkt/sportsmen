@@ -62,7 +62,7 @@ def process_json(input_file, output_dir, key_to_match, categories_to_process, ke
                 item['Времястарта'] = item.pop('Время старта')
                 item['Время'] = time_difference
             except KeyError:
-                print(f"Предупреждение: Отсутствуют ключи 'Время финиша' или 'Время старта' для элемента. Устанавливаем время в None.")
+                #print(f"Предупреждение: Отсутствуют ключи 'Время финиша' или 'Время старта' для элемента. Устанавливаем время в None.")
                 item['Время'] = None
 
             item['Имя и Фамилия'] = f"{item.get('Имя', '')} {item.get('Фамилия', '')}"
@@ -88,7 +88,7 @@ input_file = 'data/race_data.json'
 output_directory = 'output'
 key_to_match = 'Категория'
 categories = ['M15', 'M16', 'M18', 'w15', 'w16','w18']
-keys_to_extract = ['Нагрудный номер', 'Имя и Фамилия', 'Время', 'Категория']
+keys_to_extract = ['Нагрудный номер', 'Имя и Фамилия', 'Время', 'Место', 'Категория']
 
 # Перед запуском убедитесь, что директория 'output' существует!
 
