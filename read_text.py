@@ -74,6 +74,7 @@ def process_json(input_file, output_dir, key_to_match, categories_to_process, ke
 
             if isinstance(item, dict) and key_to_match in item and item[key_to_match] == category:
                 extracted_item = {key: item.get(key) for key in keys_to_extract}
+                extracted_item.pop('Категория', None)
                 filtered_data.append(extracted_item)
 
         # Сортировка по полю 'Время' по возрастанию (от самого быстрого до самого медленного)
@@ -89,7 +90,7 @@ def process_json(input_file, output_dir, key_to_match, categories_to_process, ke
 
 def combine_data(output_dir, prize_files, categories_to_process, place=None):
     """
-    Читает текстовые файлы, извлекает призы по местам и объединяет с JSON.
+    Читает текстовые файлы, извлекает призы и объединяет с JSON.
 
     Args:
         output_dir (str): Директория с отфильтрованными JSON.
@@ -97,7 +98,7 @@ def combine_data(output_dir, prize_files, categories_to_process, place=None):
         categories_to_process (list): Список категорий.
     """
 
-    prizes_by_place = {} # Словарь для хранения призов по местам
+    prizes_by_place = {}  # Словарь для хранения призов по номеру места
 
     for prize_file in prize_files:
         try:
@@ -107,8 +108,8 @@ def combine_data(output_dir, prize_files, categories_to_process, place=None):
                     match = re.match(r'(\d+)\s*место\s*(.*)', line)
                     if match:
                         place = int(match.group(1))  # Номер места
-                        prize = match.group(2).strip()  # Приз
-                        prizes_by_place[place] = prize # Сохраняем в словарь
+                        prize_info = match.group(2).strip()  # Приз
+                        prizes_by_place[place] = {'Приз': prize_info}  # Добавляем только приз
                     else:
                         print(f"Предупреждение: Некорректная строка в файле '{prize_file}': {line.strip()}")
 
@@ -129,15 +130,15 @@ def combine_data(output_dir, prize_files, categories_to_process, place=None):
             print(f"Ошибка: Файл '{json_file}' содержит некорректный JSON.")
             return
 
-        # Добавляем призы к результатам, если место участника есть в словаре призов
-        # Сортируем json_data по полю 'Время' по возрастанию (от самого быстрого до самого медленного)
-        json_data.sort(key=lambda x: (datetime.strptime(x['Время'], '%H:%M:%S').time() if x['Время'] else datetime.max.time()))
-        for i, result in enumerate(json_data): # i - индекс (начинается с 0), i+1 - место
+        # Добавляем призы к результатам
+        for i, result in enumerate(json_data):  # i - индекс (начинается с 0), i+1 - место
             place = i + 1
             if place in prizes_by_place:
-                result['Приз'] = prizes_by_place[place] # Добавляем приз к результату
+                result['Приз'] = prizes_by_place[place]['Приз']  # Добавляем приз к результату
+                result['Место'] = place # Добавляем место
             else:
-                result['Приз'] = None # Если для данного места нет приза
+                result['Приз'] = None  # Если для данного места нет приза
+                result['Место'] = place
 
         combined_data = {
             "Категория": category,
@@ -156,13 +157,12 @@ def combine_data(output_dir, prize_files, categories_to_process, place=None):
             print(f"Ошибка записи в файл '{combined_output_file}': {e}")
 
 
-
 # 1. Параметры и вызовы функций:
 input_file = 'data/race_data.json'
 output_directory = 'output'
 key_to_match = 'Категория'
 categories = ['M15', 'M16', 'M18', 'w15', 'w16', 'w17']
-keys_to_extract = ['Нагрудный номер', 'Имя и Фамилия', 'Время', 'Категория']
+keys_to_extract = ['Нагрудный номер', 'Имя и Фамилия', 'Время']
 
 prize_files = ['data/prizes_list_m15.txt', 'data/prizes_list_m16.txt', 'data/prizes_list_m18.txt']
 
